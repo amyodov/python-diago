@@ -1,0 +1,47 @@
+[
+	("Group 1", "Group of actions 1", "menu", [
+		("action 1",	"This is the action 1",	"execute",	"ssh server1"),
+		("action 2",	"This is the action 2",	"execute",	"echo 'Hello world!'"),
+		("action 3",	"This is the action 3",	"execute",	"ps -ef |grep root"),
+		('action-submenu',	"This is the submenu",	"menu",		[
+			('a1',	"Action a1",	"execute",	"echo a1"),
+			('a2',	"Action a2",	"execute",	"echo a2"),
+			('a3',	"Action a3",	"execute",	"echo a3"),
+			]),
+		("action 5",	"This is the action 3",	"expect",	"""
+			send_user "Connecting to server...\n"
+			
+			set timeout 60
+			spawn ssh server
+			expect {
+				"Are you sure you want to continue connecting (yes/no)?" {
+					send "yes\n"
+					exp_continue
+				}
+				-regexp "user.+server.+~.+$" {
+					# Logged in!
+				}
+				timeout {
+					send_user "Timed out during waiting for connection to host!\n"
+					exit
+				}
+			}
+			interact
+			"""
+			),
+		]
+	),
+	("Group 2",	"Group of actions 2", 		'menu',	[
+		("Group-2a",	"g1",	"menu",	[
+			("Group 2aa",	"", 'execute',	"")
+			]
+		),
+		("Action-2b",	"g2",	"execute",	"echo 42"),
+		("Group-2c",	"g3",	"menu",	[
+			("Group 2ca",	"", 'execute',	"echo 84")
+			]
+		),
+		]
+	),
+	("Action a", 'This is some action',	'execute',	'echo Voila')
+]

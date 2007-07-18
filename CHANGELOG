@@ -1,0 +1,11 @@
+0.9-alpha1 (18.07.2007)
+----------
+First public version, released on diago.sf.net.
+Contains "execute", "expect" and "menu" features.
+Allows text, dialog and xdialog menu generators.
+Includes the documentation.
+
+0.5-intra
+---------
+Internal version, implemented during July 2007 for own use.
+Never released publicly.
