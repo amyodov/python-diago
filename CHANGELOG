@@ -1,9 +1,15 @@
+0.9-alpha1a (23.07.2007)
+-----------
+Minor corrections in the source regarding GPLv3 requirements.
+
+
 0.9-alpha1 (18.07.2007)
 ----------
 First public version, released on diago.sf.net.
 Contains "execute", "expect" and "menu" features.
 Allows text, dialog and xdialog menu generators.
 Includes the documentation.
+
 
 0.5-intra
 ---------
