@@ -1,5 +1,7 @@
-OVERVIEW
-========
+# Diago: convenient menu based on `dialog`
+
+## OVERVIEW
+
 Diago is a tool which allows to easily create hierarchy of menus, and browse
 such menus. The name of the tool means “DIAlog GO” – the tool “go”, which is
 actually a frontend over another tool, “dialog”.
@@ -19,8 +21,8 @@ choose between them, rather than remember the long command lines and argument
 lists? Automate your typical actions? Do whatever you want with this tool – it
 is just a hammer, and it is you who decide what nails to hit.
 
-USAGE
-=====
+## USAGE
+
 Diago is a Python program (called “`go.py`”, but, for your convenience, you are
 highly suggested to make a symbolic link "go" referring to it, if it is not
 done already by the maintainer of this package; the following description
@@ -32,11 +34,10 @@ Additional options let you decide whether a console menu or graphical menu is
 generated, select the file which stores the structure of your menu, and
 even automatically browse into deeper level of generated menu.
 
+## OPTIONS
 
-OPTIONS
-=======
--f FILE, --file FILE
---------------------
+### -f FILE, --file FILE
+
 You can use this option if you want to generate a menu from the information
 stored in the specified file. Calling “`go`” without “`-f`” or “`--file`” option is
 equal to calling “`go -f ~/.gorc`”. The structure of such files is described
@@ -45,9 +46,8 @@ aliases in your shell, for example (in bash):
 
     alias goapache="go -f ~/.gorc-apacheconfig"
 
+## MENU STRUCTURE
 
-MENU STRUCTURE
-==============
 You likely will create at least one file describing the menu structure,
 “`~/.gorc`”. This will be the default file used by diago. But you can create
 multiple files, and call “`go`” with option “`-f FILENAME`”, executing appropriate
@@ -57,8 +57,8 @@ components: <menu> (including root menu), <menu option>, <menu option parts>
 and <whitespaces>. In fact, the only what should contain the file is the root
 menu, which is <menu> from the syntax viewpoint.
 
-<Menu>
-------
+### <Menu>
+
 <Menu> is the (surrounded with square brackets) set of <menu options>,
 delimited with commas: `[ OPTION1, OPTION2, OPTION3, ... OPTION_N ]`.
 Real-life example:
@@ -72,8 +72,8 @@ Usually (and this is suggested for readability) each <menu option> is written
 on a separate line in the file (because each <menu option> stands for a row
 in the displayed menu).
 
-<Menu option>
--------------
+### <Menu option>
+
 <Menu option> contains 4 (surrounded with round brackets) <menu option parts>,
 delimited with commas: ( OPTPART1, OPTPART2, OPTPART3, OPTPART4 ).
 Real-life example:
@@ -104,13 +104,13 @@ If Option Type is `'menu'` for some option in a menu, the Option Value must
 contain the submenu, which is just a usual <menu> from the syntax viewpoint.
 Real-life example of a <menu option> with a submenu:
 
-  ('menu1', 'menu1 description', 'menu', [
-      ('submenu action1', 'action1 description', 'execute', 'echo 1')
-      ('submenu action2', 'action1 description', 'execute', 'echo 1')
-  ])
+    ('menu1', 'menu1 description', 'menu', [
+        ('submenu action1', 'action1 description', 'execute', 'echo 1')
+        ('submenu action2', 'action1 description', 'execute', 'echo 1')
+    ])
 
-<Menu option part>
-------------------
+### <Menu option part>
+
 <Menu option part> is usually the string (the only exception,
 described already, is the Option Value, in case if Option Type is `'menu'`)
 containing some text. The string syntax rules are equal to those in Python,
@@ -119,41 +119,46 @@ double quotes, may contain escape sequences similarly to other languages
 (which are interpreted in single-quoted-strings and double-quoted-strings
 equally, unlike in C/C++), like \n, \r, \'', \" or \\. It also may contain
 the following escape sequences:
-  \xhh – character with hex value hh,
-  \ooo – character with octal value ooo,
-  \N{name} – character named name in the Unicode database
+  
+  * \xhh – character with hex value hh,
+  * \ooo – character with octal value ooo,
+  * \N{name} – character named name in the Unicode database
             (Unicode string only, see below)
-  \uxxxx   – character with 16-bit hex value xxxx (Unicode strings only,
+  * \uxxxx   – character with 16-bit hex value xxxx (Unicode strings only,
              see below),
-  \Uxxxxxxxx – character with 32-bit hex value xxxxxxxx (Unicode strings
+  * \Uxxxxxxxx – character with 32-bit hex value xxxxxxxx (Unicode strings
                only, see below),
 
-  The opening string quote may be prefixed with `u` or `U` symbol, what makes
-  it a “Unicode string”, for example: `u'Hello world \N{dram}'`. Such string may
-  accept Unicode characters, and also \N{name}, \uxxxx and \Uxxxxxxxx escape
-  sequences.
-  The opening string quote may also be prefixed with `r` or `R` symbol, what
-  makes it a “raw” string, for example: `r'Hello world'`. Within such “raw”
-  strings, the character following the backslash symbol (unless the backslash
-  symbol is the last symbol in the string) is not interpreted, that is `r'\n'
-  string mean a string with two symbols, “backslash” and “`n`”.
-  If raw modifier is used together with Unicode modifier, Unicode modifier
-  should go first, for example: `ur'Hello world'`.
-  The string may also be surrounded with triple single-quotes
-  (or double-quotes); within such triple quotes, the escape symbols are not
-  interpreted, backslash symbol is left as is, and single and double quotes can
-  be used freely (until there are no more than three them in a row, what
-  stands for the end of triple-quotes string). This is especially useful for
-  embedding the expect scripts into the menu (value “`expect`” for the
-  Option Type).
-  Example:
+The opening string quote may be prefixed with `u` or `U` symbol, what makes
+it a “Unicode string”, for example: `u'Hello world \N{dram}'`. Such string may
+accept Unicode characters, and also \N{name}, \uxxxx and \Uxxxxxxxx escape
+sequences.
+
+The opening string quote may also be prefixed with `r` or `R` symbol, what
+makes it a “raw” string, for example: `r'Hello world'`. Within such “raw”
+strings, the character following the backslash symbol (unless the backslash
+symbol is the last symbol in the string) is not interpreted, that is `r'\n'
+string mean a string with two symbols, “backslash” and “`n`”.
+
+If raw modifier is used together with Unicode modifier, Unicode modifier
+should go first, for example: `ur'Hello world'`.
+
+The string may also be surrounded with triple single-quotes
+(or double-quotes); within such triple quotes, the escape symbols are not
+interpreted, backslash symbol is left as is, and single and double quotes can
+be used freely (until there are no more than three them in a row, what
+stands for the end of triple-quotes string). This is especially useful for
+embedding the expect scripts into the menu (value “`expect`” for the
+Option Type).
+
+Example:
+
+    send_user "Connecting to server...\n"
+    set timeout 60
+    spawn ssh server.tld
+    interact
   
-      send_user "Connecting to server...\n"
-      set timeout 60
-      spawn ssh server.tld
-      interact
-  
-<Whitespaces>
--------------
+### <Whitespaces>
+
 Any whitespace symbols (space, newline, tabulation, etc) may be freely used
 between <menu option parts> and <menu options>.
