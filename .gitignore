@@ -1,0 +1,4 @@
+/.idea/
+*.iml
+*nogit*
+__pycache__

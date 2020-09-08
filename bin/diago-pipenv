@@ -1,0 +1,22 @@
+#!/bin/sh
+# Use this script to execute python-diago when there is a pipenv environemt installed in its directory.
+#
+# If you are using "g" alias to launch diago, made a link like
+#   alias g=PATH_TO_DIAGO_PROJECT/bin/diago-pipenv
+#
+# Requirements: pipenv, virtualenv
+
+PREVDIR=`pwd`
+
+# Find the directory of the project
+DIAGODIR=`dirname $0`/../
+cd $DIAGODIR
+
+# Using pipenv, find the virtualenv directory
+VENV_DIR=`PIPENV_VERBOSITY=-1 pipenv --venv --bare`
+source ${VENV_DIR}/bin/activate
+cd $PREVDIR
+
+# Execute the diago in virtualenv environment
+export PYTHONPATH=$PYTHONPATH:$DIAGODIR
+python3 -m diago $@
