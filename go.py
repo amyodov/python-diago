@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 go - a tool for dialog-based menus.
@@ -125,7 +125,7 @@ def MakeMenu_Iterator(menu):
 
 	max_num = len(menu)
 	max_size = len(str(max_num))
-	for i in xrange (0, len(menu)):
+	for i in range(0, len(menu)):
 		item = menu[i]
 		yield (item[0], "%s[%*i/%*i] %s" % ( ConvertTypeToChar(item[2]), max_size, i+1, max_size, max_num, item[1]))
 
@@ -208,7 +208,7 @@ def HandleItem_Menu(d, title, menuarray, autopath=[], currentpath=[]):
 
 		(code, tag) = d.menu(
 			title,
-			choices = menu_dialog
+			choices = menu_dialog,
 			)
 
 	if code == d.DIALOG_OK:
@@ -216,11 +216,11 @@ def HandleItem_Menu(d, title, menuarray, autopath=[], currentpath=[]):
 		return True
 
 	elif code == d.DIALOG_CANCEL:
-		print "Cancel chosen, quitting the tool."
+		print("Cancel chosen, quitting the tool.")
 		return False
 
 	elif code == d.DIALOG_ESC:
-		print "Esc pressed, quitting the tool."
+		print("Esc pressed, quitting the tool.")
 		return False
 
 	else:
@@ -394,7 +394,7 @@ class TextDialog(object):
 		Generate a menu
 		"""
 		for (name, descr) in choices:
-			print descr[0]+QuoteString(name)
+			print(descr[0]+QuoteString(name))
 
 		sys.exit(EXIT_SUCCESS)
 
@@ -470,7 +470,9 @@ if not MODE:
 # Create main Dialog object
 try:
 	if MODE == 'dialog':
-		d = dialog.Dialog(dialog=MODE)
+		d = dialog.Dialog(dialog=MODE,
+		autowidgetsize=True
+		)
 	elif MODE == 'Xdialog':
 		d = dialog.Dialog(dialog=MODE, compat="Xdialog")
 	elif MODE == 'text':
@@ -485,7 +487,7 @@ except dialog.ExecutableNotFound:
 FILENAME = os.path.expanduser(FILENAME)
 
 try:
-	input_file = file(FILENAME, 'r')
+	input_file = open(FILENAME, 'r')
 except IOError:
 	logging.error('Cannot open the file %s, check its presence and access rights.' % FILENAME)
 	sys.exit(EXIT_FAILURE)
