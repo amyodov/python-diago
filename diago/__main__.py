@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 # How many fields must be in a tuple
 FIELDS_IN_TUPLE = 4
 
-DEFAULT_FILENAME = '~/.gorc'
-DIAGO_BINARY_NAME = 'go'
+DEFAULT_FILENAME = '~/.diago/config'
+DIAGO_BINARY_NAME = 'diago'
 DIAGO_VERSION = namedtuple('Version', ['major', 'minor', 'suffix'])(
     major=0,
     minor=9,
@@ -48,49 +48,44 @@ EXIT_SYNTAXERROR = 2
 RE_nonalphadigits = re.compile(r'\W')
 
 
-def FormatMenuFieldForOutput(field):
-    """Convert he field of the tuple to the printable format.
+def format_menu_field_for_output(field) -> str:
+    """Convert the field of the tuple to the printable format.
 
     :param field field of a tuple (a single variable)
-    :rtype str
     """
-
-    if type(field) == str:
-        return '"%s"' % field
-    elif type(field) == list:
+    if isinstance(field, str):
+        return f'"{field}"'
+    elif isinstance(field, list):
         return '[]'
-    elif type(field) == tuple:
+    elif isinstance(field, tuple):
         return '()'
     else:
         return f'"{field}"-{type(field)}'
 
 
-def FormatMenuItemForOutput(item):
+def format_menu_item_for_output(item) -> str:
     """Convert the menu item to a string ready to be printed.
 
     :param item the menu item (tuple)
-    :rtype str
     """
-    return '({})'.format(', '.join(FormatMenuFieldForOutput(i) for i in item))
+    return '({})'.format(', '.join(format_menu_field_for_output(i) for i in item))
 
 
-def FormatMenuForOutput(menu):
-    """Convert еру menu to a string ready to be printed
+def format_menu_for_output(menu) -> str:
+    """Convert the menu to a string ready to be printed
 
     :param menu menu structure (array)
-    :rtype str
     """
-    return f'[\n  %s\n]'.format(',\n  '.join(FormatMenuItemForOutput(i) for i in menu))
+    return '[\n  {}\n]'.format(',\n  '.join(format_menu_item_for_output(i) for i in menu))
 
 
-def ConvertTypeToChar(stype):
+def convert_type_to_char(stype) -> str:
     """Convert the type field to a character designating it in the menu.
 
     Unhandled types are converted to '?' character
 
     :param stype the string containing the type of the
     :return string containing the character
-    :rtype str
     """
     mapping = {
         'menu': '>',
@@ -105,20 +100,17 @@ def ConvertTypeToChar(stype):
     return res
 
 
-def MakeMenu_Iterator(menu):
+def make_menu_iterator(menu):
     """Make an iterator over menu items."""
     max_num = len(menu)
     max_size = len(str(max_num))
     for i in range(0, len(menu)):
         item = menu[i]
-        yield (item[0], "%s[%*i/%*i] %s" % (ConvertTypeToChar(item[2]), max_size, i + 1, max_size, max_num, item[1]))
+        yield (item[0], "%s[%*i/%*i] %s" % (convert_type_to_char(item[2]), max_size, i + 1, max_size, max_num, item[1]))
 
 
-def QuoteString(s):
-    """For a string, decide how it should be quoted for the shell.
-
-    :type s string
-    """
+def quote_string_for_shell(s: str):
+    """For a string, decide how it should be quoted for the shell."""
     # 1. Put backslash in front of: \, $, ", `
     # 2. Put into double quotes if there are any non-alphadigits
 
@@ -129,17 +121,17 @@ def QuoteString(s):
 
     ## 2.
     if RE_nonalphadigits.search(s):
-        s = "'%s'" % s
+        s = f"'{s}'"
 
     return s
 
 
-def HandleItem_Menu(d, title, menuarray, autopath=None, currentpath=None):
+def handle_item_menu(d, title, menuarray, autopath=None, currentpath=None):
     """Handle the "menu"-type item.
 
     :param d dialog
     :param title menu title
-    :param menuarray list with the items for the menu. Each item is a tuple of two elements
+    :param menuarray list with the items for the menu. Each item is a tuple of two elements.
     :param autopath list with the path which should be browsed automatically
     :param currentpath  list containing the current path inside the menu
 
@@ -155,22 +147,22 @@ def HandleItem_Menu(d, title, menuarray, autopath=None, currentpath=None):
     for i in menuarray:
         if len(i) < FIELDS_IN_TUPLE:
             logger.error('The following menu item is incomplete: %s',
-                         FormatMenuItemForOutput(i))
+                         format_menu_item_for_output(i))
             return False
 
-    menu_dialog = [s for s in MakeMenu_Iterator(menuarray)]
+    menu_dialog = [s for s in make_menu_iterator(menuarray)]
     menu_hash = {i[0]: i for i in menuarray}
 
     # Check for duplicating names of menu items
     if len(menu_dialog) != len(menu_hash):
         logger.error('Item names in the following menu should be unique: %s',
-                     FormatMenuForOutput(menuarray))
+                     format_menu_for_output(menuarray))
         return False
 
     if autopath:
         # If path is non-empty, try it...
         cur_item = autopath.pop(0)
-        (code, tag) = (d.DIALOG_OK, cur_item)
+        (code, tag) = (d.OK, cur_item)
         if cur_item not in menu_hash:
             logger.error('Cannot browse into "%s"', tag)
             sys.exit(EXIT_FAILURE)
@@ -179,25 +171,25 @@ def HandleItem_Menu(d, title, menuarray, autopath=None, currentpath=None):
 
         # Title should not be empty!
         if not title:
-            title = " "
+            title = ' '
 
         # Append the path to the title
-        title = title + "\nPath: " + ' '.join((QuoteString(i) for i in currentpath))
+        title = f'{title}\nPath: ' + ' '.join((quote_string_for_shell(i) for i in currentpath))
 
         (code, tag) = d.menu(
             title,
             choices=menu_dialog,
         )
 
-    if code == d.DIALOG_OK:
-        HandleMenuItem(d, menu_hash[tag], autopath, currentpath + [tag])
+    if code == d.OK:
+        handle_menu_item(d, menu_hash[tag], autopath, currentpath + [tag])
         return True
 
-    elif code == d.DIALOG_CANCEL:
+    elif code == d.CANCEL:
         print('Cancel chosen, quitting the tool.')
         return False
 
-    elif code == d.DIALOG_ESC:
+    elif code == d.ESC:
         print('Esc pressed, quitting the tool.')
         return False
 
@@ -205,7 +197,7 @@ def HandleItem_Menu(d, title, menuarray, autopath=None, currentpath=None):
         logger.error('Unknown return code from dialog: %s', code)
 
 
-def HandleItem_Execute(command):
+def handle_item_execute(command):
     """Handle the "execute"-type item.
 
     :param command command to execute
@@ -214,7 +206,7 @@ def HandleItem_Execute(command):
     os.system(command)
 
 
-def HandleItem_Expect(script):
+def handle_item_expect(script):
     """Handle the "expect"-type item.
 
     :param script expect-script to execute
@@ -236,18 +228,16 @@ def HandleItem_Expect(script):
     os.system(f'expect -f {fname}')
 
 
-def HandleMenuItem(d, menutuple, autopath=None, currentpath=None):
+def handle_menu_item(d, menutuple, autopath=None, currentpath=None):
     """Process an item of the menu.
 
-    Arguments:
-        d              - dialog
-        menutuple      - a tuple from the menu
-        autopath=[]    - list with the path which should be browsed automatically
-        currentpath=[] - list containing the current path inside the menu
+    :param d dialog
+    :param menutuple a tuple from the menu
+    :param autopath [] - list with the path which should be browsed automatically
+    :param currentpath [] - list containing the current path inside the menu
 
-    Returns:
-        0              - ok
-        False          - error
+    :return 0 - ok
+            False - error
     """
     if autopath is None:
         autopath = []
@@ -255,8 +245,8 @@ def HandleMenuItem(d, menutuple, autopath=None, currentpath=None):
         currentpath = []
 
     if len(menutuple) != FIELDS_IN_TUPLE:
-        logger.error("The the syntax of the following item is incorrect (%s items instead of %s): %s",
-                     len(menutuple), FIELDS_IN_TUPLE, FormatMenuItemForOutput(menutuple))
+        logger.error('The the syntax of the following item is incorrect (%s items instead of %s): %s',
+                     len(menutuple), FIELDS_IN_TUPLE, format_menu_item_for_output(menutuple))
         return False
 
     (name, description, itemtype, item) = menutuple
@@ -265,31 +255,31 @@ def HandleMenuItem(d, menutuple, autopath=None, currentpath=None):
         # What if this does not contain a list? Then it's a error.
         if not isinstance(item, list):
             logger.error('The following item should contain a list of menu fields: %s',
-                         FormatMenuItemForOutput(item))
+                         format_menu_item_for_output(item))
             return False
 
         # It contains a list indeed. Show the submenu
-        HandleItem_Menu(d, description, item, autopath, currentpath)
+        handle_item_menu(d, description, item, autopath, currentpath)
 
     elif itemtype == 'execute':
         # What if this does not contain a string to execute? Then it's a error.
         if not isinstance(item, str):
             logger.error('The following item should contain a string with the command to execute: %s',
-                         FormatMenuItemForOutput(menutuple))
+                         format_menu_item_for_output(menutuple))
             return False
 
-        HandleItem_Execute(item)
+        handle_item_execute(item)
 
     elif itemtype == 'expect':
         # What if this does not contain a string to execute? Then it's a error.
         if not isinstance(item, str):
             logger.error('The following item should contain a string with the expect script to execute: %s',
-                         FormatMenuItemForOutput(menutuple))
+                         format_menu_item_for_output(menutuple))
             return False
 
-        HandleItem_Expect(item)
+        handle_item_expect(item)
         logger.error('Unknown item type "%s" in following item: %s',
-                     itemtype, FormatMenuItemForOutput(menutuple))
+                     itemtype, format_menu_item_for_output(menutuple))
 
     else:
         return False
@@ -297,7 +287,7 @@ def HandleMenuItem(d, menutuple, autopath=None, currentpath=None):
     return False
 
 
-def PrintHelp():
+def print_help():
     """Just print the help."""
     print(
         f'{DIAGO_BINARY_NAME} v. {DIAGO_VERSION.major}.{DIAGO_VERSION.minor}-{DIAGO_VERSION.suffix} - a tool for dialog-based menus.\n' +
@@ -329,17 +319,17 @@ def PrintHelp():
 
 
 class TextDialog:
-    """Custom analog of Dialog class, capable of printing the items"""
+    """Custom analog of Dialog class, capable of printing the items."""
 
     # Simulate constants from "dialog"
-    DIALOG_OK = 0
-    DIALOG_CANCEL = 1
-    DIALOG_ESC = 2
+    OK = 0
+    CANCEL = 1
+    ESC = 2
 
     def menu(self, title, choices):
         """Generate a menu."""
         for (name, descr) in choices:
-            print(descr[0] + QuoteString(name))
+            print(descr[0] + quote_string_for_shell(name))
 
         sys.exit(EXIT_SUCCESS)
 
@@ -372,7 +362,7 @@ def main():
             """
             -h, --help
             """
-            PrintHelp()
+            print_help()
             sys.exit(EXIT_SUCCESS)
         elif arg in mode_dict:
             """
@@ -432,16 +422,16 @@ def main():
         sys.exit(EXIT_FAILURE)
     else:
         try:
-            Root = eval(input_text)
+            root = eval(input_text)
         except:
             logger.error('Cannot parse the file %s due to incorrect syntax.', FILENAME)
             sys.exit(EXIT_FAILURE)
         else:
-            if type(Root) != list:
+            if not isinstance(root, list):
                 logger.error('Root menu in the file %s must contain a list.', FILENAME)
                 sys.exit(EXIT_FAILURE)
 
-            HandleItem_Menu(d, 'Choose option:', Root, AUTO_PATH, [])
+            handle_item_menu(d, 'Choose option:', root, AUTO_PATH, [])
 
 
 if __name__ == '__main__':

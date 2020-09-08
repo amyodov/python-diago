@@ -10,7 +10,7 @@ For example, imagine, you have a lot of accounts on a bunch of Unix servers,
 and need to be able to connect to each of them, but do not want to remember
 all the hostnames, logins and passwords. Now you can create a menu listing all
 of the servers, put the required commands/scripts to connect there, and after
-that just call a short command (“`go`” or “`go.py`”, or even “`g`”) – the menu with the list will
+that just call a short command (“`diago`” or “`diago.py`”, or even “`g`”) – the menu with the list will
 be displayed, and you just choose the needed destination, and voila, you are
 connected! Moreover, you can group such servers and create submenus, you can
 make each server into a menu if there are several ways to access it…
@@ -23,16 +23,25 @@ is just a hammer, and it is you who decide what nails to hit.
 
 ## USAGE
 
-Diago is a Python program (called “`go.py`”, but, for your convenience, you are
-highly suggested to make a symbolic link "go" referring to it, if it is not
+Diago is a Python program (called “`diago`”, but, for your convenience, you are
+highly suggested to make an alias like `g` referring to it, if it is not
 done already by the maintainer of this package; the following description
-assumes that it is done already, and the tool can be executed by “`go`” command).
+assumes that it is done already, and the tool can be executed by “`diago`” command).
 It may be called with or without command line options; calling the tool by just
-“`go`” displays a menu in your console, and the “default” menu is generated, upon
-the configuration file “`~/.gorc`” (“`.gorc`” file in your home directory).
+“`diago`” displays a menu in your console, and the “default” menu is generated, upon
+the configuration file “`~/diago/config`”.
 Additional options let you decide whether a console menu or graphical menu is
 generated, select the file which stores the structure of your menu, and
 even automatically browse into deeper level of generated menu.
+
+## HISTORY
+
+This tool appeared due after the experience of using a great SecureCRT terminal in Windows, and the lack of the tools
+that would allow to create a simple “menu to remotely log in” in Linux. Initially (in 2007) it has been called just
+“`go`” (as in, “you can go anywhere with this tool”), but then renamed to “`diago`” in 2009,
+after the appearance of Go programming language which used the `go` binary extensively for its own purposes.
+
+In practice, making an alias to just `g` is even better than `go`. 
 
 ## OPTIONS
 
@@ -40,16 +49,16 @@ even automatically browse into deeper level of generated menu.
 
 You can use this option if you want to generate a menu from the information
 stored in the specified file. Calling “`go`” without “`-f`” or “`--file`” option is
-equal to calling “`go -f ~/.gorc`”. The structure of such files is described
+equal to calling “`go -f ~/.diago/config`”. The structure of such files is described
 below, in the section “`MENU STRUCTURE`”. Do not forget that you may create
 aliases in your shell, for example (in bash):
 
-    alias goapache="go -f ~/.gorc-apacheconfig"
+    alias goapache="diago -f ~/.diago-apacheconfig"
 
 ## MENU STRUCTURE
 
 You likely will create at least one file describing the menu structure,
-“`~/.gorc`”. This will be the default file used by diago. But you can create
+“`~/.diago/config`”. This will be the default file used by diago. But you can create
 multiple files, and call “`go`” with option “`-f FILENAME`”, executing appropriate
 menus.
 The file with the menu structure contains the following distinct syntax
